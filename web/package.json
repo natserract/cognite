@@ -1,0 +1,35 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "browserslist": {
+    "development": [
+      "last 1 version"
+    ],
+    "production": [
+      "defaults",
+      "not IE 11",
+      "not IE_Mob 11"
+    ]
+  },
+  "dependencies": {
+    "@pankod/refine": "^2.7.1",
+    "@pankod/refine-graphql": "^2.7.1",
+    "@pankod/refine-react-router": "^2.7.1",
+    "@redwoodjs/forms": "0.42.1",
+    "@redwoodjs/router": "0.42.1",
+    "@redwoodjs/web": "0.42.1",
+    "camelcase": "^6.3.0",
+    "gql-query-builder": "^3.5.7",
+    "graphql-request": "^3.7.0",
+    "lodash.setwith": "^4.3.2",
+    "pluralize": "^8.0.0",
+    "prop-types": "15.8.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "@types/lodash.setwith": "^4.3.6",
+    "@types/pluralize": "^0.0.29"
+  }
+}
