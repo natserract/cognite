@@ -1,4 +1,4 @@
-import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetails, CognitoUserSession } from 'amazon-cognito-identity-js';
+import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetails, CognitoUserSession, CognitoAccessToken } from 'amazon-cognito-identity-js';
 import CognitoIdentityServiceProvider from 'aws-sdk/clients/cognitoidentityserviceprovider'
 import AWS from 'aws-sdk'
 import owasp from 'owasp-password-strength-test';
@@ -107,7 +107,7 @@ export const loginCognito = async (payloads: AuthPayloads) => {
   return token
 }
 
-type RegisterUserPayloads = {
+export type UserPayloads = {
   email: string,
   name: string,
   familyName: string,
@@ -117,7 +117,7 @@ type RegisterUserPayloads = {
   tenantId: string,
 }
 
-export const registerCognito = async (payloads: RegisterUserPayloads) => {
+export const registerCognito = async (payloads: UserPayloads) => {
   const { email, name, familyName, phoneNumber, password, lastName, tenantId } = payloads
 
   const attributeList = []
@@ -221,10 +221,10 @@ export const confirmRegistration = async (payloads: ConfirmRegistrationPayloads)
 
 type UpdateUserPayloads = {
   token: string;
-  userAttributes: Partial<RegisterUserPayloads>
+  userAttributes: Partial<UserPayloads>
 }
 
-export const updateUser = async (payloads: UpdateUserPayloads) => {
+export const updateUser = async (payloads: UpdateUserPayloads): Promise<Boolean | Error> => {
   const { token, userAttributes } = payloads
   const attributeList = []
 
@@ -284,24 +284,32 @@ export const updateUser = async (payloads: UpdateUserPayloads) => {
         reject(err)
       }
 
-      resolve(result)
+      resolve(true)
     })
   })
 }
 
-export const logoutCognito = async (payloads: Pick<AuthPayloads, 'username'>) => {
-  const { username } = payloads;
+type LogoutPayloads = {
+  token: string;
+}
 
-  const userData = {
-    Username: username,
-    Pool: userPool,
+export const logoutCognito = async (payloads: LogoutPayloads): Promise<string>  => {
+  const { token } = payloads;
+
+  const params = {
+    AccessToken: token
   }
-  const cognitoUser = new CognitoUser(userData)
 
   return new Promise((resolve, reject) => {
-    cognitoUser.globalSignOut({
-      onSuccess: resolve,
-      onFailure: reject
+    client.globalSignOut(params, (
+      err,
+      _data
+    ) => {
+      if (err) {
+        reject(err)
+      }
+
+      resolve('Logout success!')
     })
   })
 }
@@ -359,7 +367,9 @@ export const listUser = async (payloads: ListUserPayloads) => {
   })
 }
 
-export const getUser = async (payloads: Pick<AuthPayloads, 'username'>) => {
+type GetUserReturn = CognitoIdentityServiceProvider.AdminGetUserResponse
+
+export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise<GetUserReturn> => {
   const { username } = payloads
   const params = {
     UserPoolId: process.env.AWS_POOL_ID,
@@ -373,6 +383,45 @@ export const getUser = async (payloads: Pick<AuthPayloads, 'username'>) => {
     ) => {
       if (err) reject(err)
       else resolve(result)
+    })
+  })
+}
+
+export const getUserSession = async (): Promise<CognitoUserSession> => {
+  return new Promise((resolve, reject) => {
+    const currentUser = userPool.getCurrentUser()
+
+    if (!currentUser) resolve(null)
+
+    currentUser.getSession((
+      error: Error,
+      session: CognitoUserSession
+    ) => {
+      if (error) {
+        reject(error)
+      }
+
+      resolve(session);
+    })
+  })
+}
+
+export const getToken = async (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const currentUser = userPool.getCurrentUser()
+
+    if (!currentUser) resolve(null)
+
+    currentUser.getSession((
+      error: Error,
+      session: CognitoUserSession
+    ) => {
+      if (error) {
+        reject(error)
+      }
+
+      const accessToken = session.getAccessToken()
+      resolve(accessToken.getJwtToken());
     })
   })
 }

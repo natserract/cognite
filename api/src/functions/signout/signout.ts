@@ -1,4 +1,5 @@
 import type { APIGatewayEvent, Context } from 'aws-lambda'
+import { getUserSession, logoutCognito } from 'src/lib/cognito'
 import { logger } from 'src/lib/logger'
 
 /**
@@ -17,8 +18,19 @@ import { logger } from 'src/lib/logger'
  * @param { Context } context - contains information about the invocation,
  * function, and execution environment.
  */
-export const handler = async (event: APIGatewayEvent, context: Context) => {
+
+export const handler = async ()=> {
   logger.info('Invoked signout function')
+
+  const userSession = await getUserSession();
+  const token = userSession.getAccessToken().getJwtToken()
+
+  let responses = ''
+  if (token) {
+    responses = await logoutCognito({
+      token
+    });
+  }
 
   return {
     statusCode: 200,
@@ -26,7 +38,7 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      data: 'signout function',
+      data: responses,
     }),
   }
 }

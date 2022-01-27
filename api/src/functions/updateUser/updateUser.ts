@@ -1,4 +1,5 @@
 import type { APIGatewayEvent, Context } from 'aws-lambda'
+import { getUserSession, getToken, updateUser, UserPayloads, getUser } from 'src/lib/cognito'
 import { logger } from 'src/lib/logger'
 
 /**
@@ -17,8 +18,44 @@ import { logger } from 'src/lib/logger'
  * @param { Context } context - contains information about the invocation,
  * function, and execution environment.
  */
+
+type UpdateUserInput = {
+  userAttributes: UserPayloads
+};
+
 export const handler = async (event: APIGatewayEvent, context: Context) => {
   logger.info('Invoked updateUser function')
+
+  const { userAttributes } = JSON.parse(event.body) as UpdateUserInput
+
+  async function updateUserCognito() {
+    const token = await getToken()
+    const results = await updateUser({
+      token,
+      userAttributes,
+    })
+
+    return results
+  }
+
+  async function getUserSessionCognito() {
+    const userSession = await getUserSession();
+    const payload = userSession.getIdToken()
+    const { email } = payload.payload
+
+    const results = await getUser({
+      username: email,
+    })
+
+    return results
+  }
+
+  let userSessions = {};
+  const updateUserResponse = await updateUserCognito();
+
+  if (updateUserResponse) {
+    userSessions = await getUserSessionCognito();
+  }
 
   return {
     statusCode: 200,
@@ -26,7 +63,7 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      data: 'updateUser function',
+      data: userSessions,
     }),
   }
 }
