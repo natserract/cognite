@@ -1,16 +1,20 @@
-import type { Prisma } from '@prisma/client'
-import type { ResolverArgs } from '@redwoodjs/graphql-server'
+import { getUser, listUser } from 'src/lib/cognito'
 
-export const listUserCognito = async () => {
-  return new Promise((resolve) => {
-    resolve({
-      message: 'Success'
-    })
-  })
+type ListUserCognitoInput = {
+  search: string;
 }
 
-export const getUserCognito = () => {
-  // TODO:
+export const listUserCognito = async ({ search }: ListUserCognitoInput) => {
+  const results = await listUser({ search })
+  return results
+}
+
+type GetUserCognitoInput = {
+  username: string;
+}
+export const getUserCognito = async ({ username }: GetUserCognitoInput) => {
+  const results = await getUser({ username })
+  return results
 }
 
 type CreateUserField = {
@@ -43,6 +47,6 @@ export const verifyUserCognito = ({ input }: VerifyUserInput) => {
   // TODO: implement
 }
 
-export const deleteUserCognito = ({input}) => {
+export const deleteUserCognito = ({ input }) => {
   // TODO: implement
 }
