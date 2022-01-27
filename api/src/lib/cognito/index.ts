@@ -39,17 +39,19 @@ owasp.tests.required.push((password) => {
   }
 })
 
-type LoginUserPayloads = {
+type AuthPayloads = {
   username: string;
   password: string;
 }
 
 type LoginUserReturn = {
   username: string;
+  name: string;
+  email: string;
   token: string;
 }
 
-export const loginCognito = async (payloads: LoginUserPayloads): Promise<LoginUserReturn> => {
+export const loginCognito = async (payloads: AuthPayloads) => {
   console.log('poolData', poolData)
 
   const { username, password } = payloads
@@ -80,17 +82,11 @@ export const loginCognito = async (payloads: LoginUserPayloads): Promise<LoginUs
 
         // User authentication was successful
         const jwtToken = result.getAccessToken().getJwtToken()
-
         const payload = result.getIdToken()
-        const { sub } = payload.payload
-
-        console.log('User authentication was successful', payload);
+        const { sub, name, email } = payload.payload
 
         if (jwtToken) {
-          resolve({
-            username: sub,
-            token: jwtToken,
-          })
+          resolve(result)
         }
       },
       onFailure: error => {
@@ -109,7 +105,7 @@ export const loginCognito = async (payloads: LoginUserPayloads): Promise<LoginUs
     })
   })
 
-  return token as LoginUserReturn
+  return token
 }
 
 type RegisterUserPayloads = {
@@ -292,6 +288,24 @@ export const updateUser = async (payloads: UpdateUserPayloads) => {
       }
 
       resolve(result)
+    })
+  })
+}
+
+export const logoutCognito = async (payloads: Pick<AuthPayloads, 'username'>) => {
+  const { username } = payloads;
+
+  const userPool = new CognitoUserPool(poolData);
+  const userData = {
+    Username: username,
+    Pool: userPool,
+  }
+  const cognitoUser = new CognitoUser(userData)
+
+  return new Promise((resolve, reject) => {
+    cognitoUser.globalSignOut({
+      onSuccess: resolve,
+      onFailure: reject
     })
   })
 }

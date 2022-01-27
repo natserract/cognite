@@ -1,8 +1,6 @@
 import type { APIGatewayEvent, Context } from 'aws-lambda'
 import { logger } from 'src/lib/logger'
 
-import { confirmRegistration, loginCognito, registerCognito, updateUser } from 'src/lib/cognito'
-
 /**
  * The handler function is your code that processes http request events.
  * You can use return and throw to send a response or error, respectively.
@@ -20,39 +18,7 @@ import { confirmRegistration, loginCognito, registerCognito, updateUser } from '
  * function, and execution environment.
  */
 export const handler = async (event: APIGatewayEvent, context: Context) => {
-  logger.info('Invoked authorization function')
-
-  // const registerResponses = registerCognito({
-  //   email: 'aveqhfj193@tormails.com',
-  //   familyName: 'Surya',
-  //   name: 'Alfin Surya',
-  //   password: 'Surya9090.',
-  //   phoneNumber: '+5412614324321'
-  // })
-  // console.log('registerResponses', await registerResponses);
-
-  // confirmRegistration({
-  //   code: '095285',
-  //   username: 'alfins132@gmail.com'
-  // })
-
-  // const logIn = await loginCognito({
-  //   username: 'alfins132@gmail.com',
-  //   password: 'Surya9090.'
-  // })
-  // console.log('TOKEN', logIn.token)
-
-  // const updateUserResponses = await updateUser({
-  //   token: logIn?.token,
-  //   userAttributes: {
-  //     name: 'Alfin Surya',
-  //     email: 'alfins132@gmail.com',
-  //     familyName: 'Bos Surya 2',
-  //   }
-  // })
-
-  // console.log('updateUserResponses', await updateUserResponses);
-  // logIn.
+  logger.info('Invoked updateUser function')
 
   return {
     statusCode: 200,
@@ -60,7 +26,7 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      data: 'authorization function',
+      data: 'updateUser function',
     }),
   }
 }
