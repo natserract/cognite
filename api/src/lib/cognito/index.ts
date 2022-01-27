@@ -1,4 +1,4 @@
-import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetails } from 'amazon-cognito-identity-js';
+import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetails, CognitoUserSession } from 'amazon-cognito-identity-js';
 import CognitoIdentityServiceProvider from 'aws-sdk/clients/cognitoidentityserviceprovider'
 import AWS from 'aws-sdk'
 import owasp from 'owasp-password-strength-test';
@@ -51,19 +51,18 @@ type LoginUserReturn = {
   token: string;
 }
 
+const userPool = new CognitoUserPool(poolData);
+
 export const loginCognito = async (payloads: AuthPayloads) => {
   console.log('poolData', poolData)
 
   const { username, password } = payloads
-
-  const userPool = new CognitoUserPool(poolData);
   const authenticationDetails = new AuthenticationDetails(
     {
       Username: username,
       Password: password,
     }
   );
-  // console.log('authenticationDetails', authenticationDetails)
 
   const userData = {
     Username: username,
@@ -121,7 +120,6 @@ type RegisterUserPayloads = {
 export const registerCognito = async (payloads: RegisterUserPayloads) => {
   const { email, name, familyName, phoneNumber, password, lastName, tenantId } = payloads
 
-  const userPool = new CognitoUserPool(poolData);
   const attributeList = []
 
   attributeList.push(
@@ -204,7 +202,6 @@ type ConfirmRegistrationPayloads = {
 export const confirmRegistration = async (payloads: ConfirmRegistrationPayloads) => {
   const { code, username } = payloads
 
-  const userPool = new CognitoUserPool(poolData);
   const userData = {
     Username: username,
     Pool: userPool,
@@ -295,7 +292,6 @@ export const updateUser = async (payloads: UpdateUserPayloads) => {
 export const logoutCognito = async (payloads: Pick<AuthPayloads, 'username'>) => {
   const { username } = payloads;
 
-  const userPool = new CognitoUserPool(poolData);
   const userData = {
     Username: username,
     Pool: userPool,
@@ -306,6 +302,77 @@ export const logoutCognito = async (payloads: Pick<AuthPayloads, 'username'>) =>
     cognitoUser.globalSignOut({
       onSuccess: resolve,
       onFailure: reject
+    })
+  })
+}
+
+export const isAuthenticated = async (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const currentUser = userPool.getCurrentUser()
+
+    if (!currentUser) resolve(false)
+    resolve(true)
+  })
+}
+
+type ListUserPayloads = {
+  search?: string,
+  filter?: string
+}
+
+export const listUser = async (payloads: ListUserPayloads) => {
+  const { search, filter } = payloads
+
+  let searchUser = ''
+  const params = {
+    UserPoolId: process.env.AWS_POOL_ID,
+    Limit: 10,
+  }
+
+  if (search) searchUser = `given_name = "${search}"`
+
+  return new Promise((resolve, reject) => {
+    if (filter) {
+      client.listUsersInGroup({
+        ...params,
+        GroupName: filter
+      }, (
+        err,
+        result
+      ) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(result)
+      })
+    } else {
+      client.listUsers({ ...params, Filter: searchUser }, (
+        err,
+        result,
+      ) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(result)
+      })
+    }
+  })
+}
+
+export const getUser = async (payloads: Pick<AuthPayloads, 'username'>) => {
+  const { username } = payloads
+  const params = {
+    UserPoolId: process.env.AWS_POOL_ID,
+    Username: username,
+  }
+
+  return new Promise((resolve, reject) => {
+    client.adminGetUser(params, (
+      err,
+      result,
+    ) => {
+      if (err) reject(err)
+      else resolve(result)
     })
   })
 }

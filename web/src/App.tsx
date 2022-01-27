@@ -10,6 +10,7 @@ import client from './libs/refine'
 import { Header, Footer, Layout } from './layouts'
 import { Title, Sider, OffLayoutArea } from './components'
 import resources from './resource'
+import authProvider from './libs/refine/auth-provider'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
 import Routes from 'src/Routes'
@@ -23,6 +24,7 @@ const App = () => (
     <RedwoodProvider titleTemplate="%PageTitle | %AppTitle">
       <RedwoodApolloProvider>
         <Refine
+          // authProvider={authProvider}
           routerProvider={routerProvider}
           dataProvider={gqlDataProvider as any}
           Title={Title}

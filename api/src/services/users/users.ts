@@ -1,12 +1,16 @@
 import type { Prisma } from '@prisma/client'
 import type { ResolverArgs } from '@redwoodjs/graphql-server'
 
-export const usersCustom = async () => {
+export const listUserCognito = async () => {
   return new Promise((resolve) => {
     resolve({
       message: 'Success'
     })
   })
+}
+
+export const getUserCognito = () => {
+  // TODO:
 }
 
 type CreateUserField = {
@@ -23,7 +27,7 @@ type CreateUserInput = {
   input: CreateUserField
 }
 
-export const createUser = ({ input }: CreateUserInput) => {
+export const createUserCognito = ({ input }: CreateUserInput) => {
   // TODO: implement
 }
 
@@ -35,6 +39,10 @@ type VerifyUserField = {
 type VerifyUserInput = {
   input: VerifyUserField
 }
-export const verifyUser = ({ input }: VerifyUserInput) => {
+export const verifyUserCognito = ({ input }: VerifyUserInput) => {
+  // TODO: implement
+}
+
+export const deleteUserCognito = ({input}) => {
   // TODO: implement
 }

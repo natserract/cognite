@@ -1,10 +1,25 @@
 export const schema = gql`
-  type Return {
-    message: String
+  type CognitoUser {
+    Users: JSON
   }
 
-  type Query {
-    usersCustom: Return! @skipAuth
+  type GetCognitoUser {
+    Username: String
+    UserAttributes: JSON
+    UserCreateDate: Date
+    UserLastModifiedDate: Date
+    Enabled: Boolean
+    UserStatus: String
+    given_name: String
+    family_name: String
+    email: String
+    phone_number: String
+    locale: String
+    zoneinfo: String
+  }
+
+  input UserInput {
+    userAttributes: JSON
   }
 
   input CreateUserInput {
@@ -22,8 +37,14 @@ export const schema = gql`
     username: String!
   }
 
+  type Query {
+    listUserCognito(search: JSON): CognitoUser @skipAuth
+    getUserCognito(username: String): GetCognitoUser @skipAuth
+  }
+
   type Mutation {
-    createUser(input: CreateUserInput): Return! @skipAuth
-    verifyUser(input: VerifyUserInput): Return! @skipAuth
+    createUserCognito(input: UserInput!): JSON @skipAuth
+    verifyUserCognito(input: VerifyUserInput): JSON @skipAuth
+    deleteUserCognito(input: String): Boolean! @skipAuth
   }
 `
