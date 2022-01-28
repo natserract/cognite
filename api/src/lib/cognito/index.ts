@@ -2,6 +2,7 @@ import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetai
 import CognitoIdentityServiceProvider from 'aws-sdk/clients/cognitoidentityserviceprovider'
 import AWS from 'aws-sdk'
 import owasp from 'owasp-password-strength-test';
+import { parseUserAttributes } from './utils';
 
 global.fetch = require('node-fetch');
 
@@ -111,14 +112,14 @@ export type UserPayloads = {
   email: string,
   name: string,
   password: string,
-  phoneNumber: string,
-  familyName?: string,
-  lastName?: string,
-  tenantId?: string,
+  phone_number: string,
+  family_name?: string,
+  last_name?: string,
+  tenant_id?: string,
 }
 
 export const registerCognito = async (payloads: UserPayloads) => {
-  const { email, name, familyName, phoneNumber, password, lastName, tenantId } = payloads
+  const { email, name, family_name, phone_number, password, last_name, tenant_id } = payloads
 
   const attributeList = []
 
@@ -132,7 +133,7 @@ export const registerCognito = async (payloads: UserPayloads) => {
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'family_name',
-      Value: familyName,
+      Value: family_name,
     }),
   )
 
@@ -146,21 +147,21 @@ export const registerCognito = async (payloads: UserPayloads) => {
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'phone_number',
-      Value: phoneNumber,
+      Value: phone_number,
     }),
   )
 
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'custom:scope',
-      Value: lastName,
+      Value: last_name,
     }),
   )
 
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'custom:tenant_id',
-      Value: tenantId,
+      Value: tenant_id,
     }),
   )
 
@@ -238,7 +239,7 @@ export const updateUser = async (payloads: UpdateUserPayloads): Promise<Boolean 
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'family_name',
-      Value: userAttributes.familyName,
+      Value: userAttributes.family_name,
     }),
   )
 
@@ -252,21 +253,21 @@ export const updateUser = async (payloads: UpdateUserPayloads): Promise<Boolean 
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'phone_number',
-      Value: userAttributes.phoneNumber,
+      Value: userAttributes.phone_number,
     }),
   )
 
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'custom:scope',
-      Value: userAttributes.lastName,
+      Value: userAttributes.last_name,
     }),
   )
 
   attributeList.push(
     new CognitoUserAttribute({
       Name: 'custom:tenant_id',
-      Value: userAttributes.tenantId,
+      Value: userAttributes.tenant_id,
     }),
   )
 
@@ -293,7 +294,7 @@ type LogoutPayloads = {
   token: string;
 }
 
-export const logoutCognito = async (payloads: LogoutPayloads): Promise<string>  => {
+export const logoutCognito = async (payloads: LogoutPayloads): Promise<string> => {
   const { token } = payloads;
 
   const params = {
@@ -361,6 +362,18 @@ export const listUser = async (payloads: ListUserPayloads) => {
         if (err) {
           reject(err)
         }
+
+        result.Users.map((item) => {
+          Object.entries(item).forEach(([key, val]) => {
+            if (key === 'Attributes') {
+              item.Attributes =
+                parseUserAttributes(val, item.Attributes, key)['Attributes'] as any;
+            }
+          })
+
+          return item
+        })
+
         resolve(result)
       })
     }
@@ -382,7 +395,18 @@ export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise
       result,
     ) => {
       if (err) reject(err)
-      else resolve(result)
+
+      let mappingResult = {} as GetUserReturn;
+      Object.entries(result).forEach(([key, val]) => {
+        if (key !== 'UserAttributes') {
+          mappingResult[key] = val
+        } else {
+          // No pure, change `mappingResult`
+          parseUserAttributes(val, mappingResult)
+        }
+      })
+
+      resolve(mappingResult)
     })
   })
 }
@@ -390,7 +414,6 @@ export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise
 export const getUserSession = async (): Promise<CognitoUserSession> => {
   return new Promise((resolve, reject) => {
     const currentUser = userPool.getCurrentUser()
-    console.log('currentUser', currentUser)
 
     if (!currentUser) resolve(null)
 
@@ -402,7 +425,6 @@ export const getUserSession = async (): Promise<CognitoUserSession> => {
         reject(error)
       }
 
-      console.log('session', session)
       resolve(session);
     })
   })

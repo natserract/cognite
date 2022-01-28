@@ -25,11 +25,20 @@ export const schema = gql`
   input CreateUserCognitoInput {
     email: String!
     name: String!
-    familyName: String
-    phoneNumber: String!
+    family_name: String
+    phone_number: String!
+    last_name: String
     password: String!
-    lastName: String
-    tenantId: String
+    tenant_id: String
+  }
+
+  input UpdateUserCognitoInput {
+    email: String
+    name: String
+    family_name: String
+    phone_number: String
+    last_name: String
+    tenant_id: String
   }
 
   input VerifyUserCognitoInput {
@@ -45,6 +54,7 @@ export const schema = gql`
 
   type Mutation {
     createUserCognito(input: CreateUserCognitoInput!): JSON @skipAuth
+    updateUserCognito(input: UpdateUserCognitoInput!): GetCognitoUser @skipAuth
     verifyUserCognito(input: VerifyUserCognitoInput!): JSON @skipAuth
     deleteUserCognito(username: String!): Boolean! @skipAuth
   }
