@@ -96,18 +96,10 @@ const UsersPage = () => {
               })}
             >
               <Table.Column
-                dataIndex="Attributes"
+                dataIndex={["Attributes", "name"]}
                 title="Username"
                 sorter
-                render={(value: any, record: any) => {
-                  const item = getUserName(value, 'email');
-
-                  return (
-                    <>
-                      {item['Value'] || 'Empty'}
-                    </>
-                  )
-                }}
+                defaultSortOrder={getDefaultSortOrder("name", sorter)}
               />
 
               <Table.Column
@@ -136,16 +128,16 @@ const UsersPage = () => {
                       <DeleteButton
                         hideText
                         resourceName="userCognito"
-                        metaData={{
-                          isCustom: true,
-                          variables: {
-                            username: {
-                              value: item['Value'],
-                              type: "String",
-                              required: true
-                            }
-                          }
-                        }}
+                        // metaData={{
+                        //   isCustom: true,
+                        //   variables: {
+                        //     username: {
+                        //       value: item['Value'],
+                        //       type: "String",
+                        //       required: true
+                        //     }
+                        //   }
+                        // }}
                         size="small"
                         recordItemId={record.Username}
                       />

@@ -17,8 +17,13 @@ const UserCreatePage = () => {
     metaData: {},
     mutationMode: "pessimistic",
     redirect: false,
-    onMutationSuccess: () => {
-      history.push('/users');
+    successNotification: {
+      message: "Register user cognito success! Please check verification code!"
+    },
+    onMutationSuccess: (data) => {
+      if (data) {
+        history.push('/users');
+      }
     }
   });
 
@@ -31,6 +36,7 @@ const UserCreatePage = () => {
           rules={[
             {
               required: true,
+              type: 'email',
             },
           ]}
         >
@@ -49,9 +55,43 @@ const UserCreatePage = () => {
         </Form.Item>
         <Form.Item
           label="Family Name"
-          name="familyName"
+          name="family_name"
         >
           <Input placeholder="Family Name" />
+        </Form.Item>
+        <Form.Item
+          label="Phone Number"
+          name="phone_number"
+          rules={[
+            {
+              required: true,
+              min: 11,
+              max: 13,
+            },
+          ]}
+        >
+          <Input placeholder="Phone Number" />
+        </Form.Item>
+
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: 'Please input your password!' }]}
+        >
+          <Input.Password />
+        </Form.Item>
+
+        <Form.Item
+          label="Last Name"
+          name="last_name"
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Tenant Id"
+          name="tenant_id"
+        >
+          <Input />
         </Form.Item>
       </Form>
     </Create>

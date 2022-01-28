@@ -129,7 +129,7 @@ const dataProvider = (client: GraphQLClient) => {
     },
     getOne: async ({ resource, id, metaData, requestHeaders }: GetManyArgs) => {
       const singularResource = pluralize.singular(resource);
-      const camelResource = camelCase(singularResource);
+      const camelResource = camelCase(`get-${singularResource}`);
 
       const operation = metaData?.operation ?? camelResource;
       const { query, variables } = gql.query({
@@ -244,16 +244,20 @@ const dataProvider = (client: GraphQLClient) => {
       const operation = metaData?.operation ?? camelResource;
       const typeInput = `${toCamelCase(camelResource)}Input`;
 
+      console.log('UPDATE variables', variables)
+
       const { query: mutation, variables: gqlVariables } = gql.mutation({
         operation,
         variables: {
-          id: {
-            value: +id!!,
-            type: "Int",
-            required: true
+          ...(!metaData.isCustom) && {
+            id: {
+              value: +id!!,
+              type: "Int",
+              required: true
+            },
           },
           input: {
-            value: { ...variables },
+            value: !metaData.offsetVariable ? { ...variables } : { ...variables[metaData.offsetVariable] },
             type: `${typeInput}`,
             required: true,
           },

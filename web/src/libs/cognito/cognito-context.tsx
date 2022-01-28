@@ -1,7 +1,8 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { loginUser, logout, userSession } from "src/api/Authorizations";
 import { toast } from '@redwoodjs/web/toast'
-
+import { useHistory } from 'react-router-dom'
+import { removeToken } from "src/utils/token";
 export interface LoginInput {
   username: string;
   password: string;
@@ -30,6 +31,8 @@ export const CognitoContext = createContext<CognitoContextInterface>({
 type Props = {}
 
 export const CognitoProvider: React.FC<Props> = (props) => {
+  const history = useHistory();
+
   const [state, setState] =
     useState<Pick<CognitoContextInterface, 'isAuthenticated' | 'currentUser'>>({
       isAuthenticated: false,
@@ -73,7 +76,13 @@ export const CognitoProvider: React.FC<Props> = (props) => {
 
       if (token !== null) {
         const currentUser = await userSession();
-        console.log("SESSION", currentUser)
+
+        if (!currentUser) {
+          window.location.href = '/login'
+          removeToken()
+        }
+
+        console.log('currentUser', currentUser)
 
         setState({
           currentUser,
@@ -83,7 +92,7 @@ export const CognitoProvider: React.FC<Props> = (props) => {
     }
 
     onFetch()
-  }, [])
+  }, [logOut])
 
   useEffect(setActiveState, [])
 

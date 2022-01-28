@@ -46,6 +46,8 @@ export const userSession = async () => {
   ).then(
     (response) => {
       const { data } = response.data;
+      if (!data.getSession) return null
+
       const access = data.getSession.idToken
       const userData = access.payload
 
@@ -65,6 +67,36 @@ export const logout = async () => {
     () => {
       removeToken();
       window.location.href = window.location.origin + '/login'
+    },
+    (error) => {
+      const errorResponse = error.response;
+      return Promise.reject({ ...errorResponse })
+    }
+  )
+}
+
+type UpdateUserArgs = {
+  email: string,
+  name: string,
+  password: string,
+  phoneNumber: string,
+  familyName?: string,
+  lastName?: string,
+  tenantId?: string,
+}
+
+export const updateUser = async (payloads: UpdateUserArgs) => {
+  return Axios.post(
+    API_BASE_URL + '/updateUser',
+    { ...payloads },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  ).then(
+    (response) => {
+      return response
     },
     (error) => {
       const errorResponse = error.response;

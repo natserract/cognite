@@ -11,18 +11,20 @@ import {
   useNavigation,
 } from '@pankod/refine'
 import { antLayoutSider, antLayoutSiderMobile } from './styles'
+import { useCognito } from 'src/libs/cognito'
 
 const { RightOutlined } = Icons
 
 export const Sider: React.FC = () => {
   const [collapsed, setCollapsed] = useState<boolean>(false)
-  const { mutate: logout } = useLogout()
   const Title = useTitle()
   const { menuItems, selectedKey } = useMenu()
   const { push } = useNavigation()
   const breakpoint = Grid.useBreakpoint()
 
   const isMobile = !breakpoint.lg
+
+  const { logOut } = useCognito()
 
   return (
     <AntdLayout.Sider
@@ -37,9 +39,9 @@ export const Sider: React.FC = () => {
       <Menu
         selectedKeys={[selectedKey]}
         mode="inline"
-        onClick={({ key }) => {
+        onClick={async ({ key }) => {
           if (key === 'logout') {
-            logout()
+            await logOut()
             return
           }
 
@@ -73,6 +75,10 @@ export const Sider: React.FC = () => {
             </Menu.Item>
           )
         })}
+
+        <Menu.Item key="logout" icon={<Icons.LogoutOutlined />}>
+          Logout
+        </Menu.Item>
       </Menu>
     </AntdLayout.Sider>
   )
