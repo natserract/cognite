@@ -1,7 +1,6 @@
-import { CognitoAuth } from 'amazon-cognito-auth-js'
 
-export const getAccessToken = (cognitoUser) => {
-  return new Promise((resolve, reject) => {
-
-  })
-}
+export { default as useCognito } from './useCognito'
+export {
+  CognitoContext,
+  CognitoProvider
+} from './cognito-context'

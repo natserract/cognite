@@ -22,7 +22,8 @@ export type GetManyArgs = {
   resource: string
   variables: any[]
   metaData?: MetaDataQuery
-  requestHeaders?: HeadersInit | undefined
+  requestHeaders?: HeadersInit | undefined,
+  isCustom?: boolean,
 }
 
 type Pagination = {

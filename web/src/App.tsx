@@ -10,32 +10,51 @@ import client from './libs/refine'
 import { Header, Footer, Layout } from './layouts'
 import { Title, Sider, OffLayoutArea } from './components'
 import resources from './resource'
-import authProvider from './libs/refine/auth-provider'
+import { AllContextProvider as AppProvider } from './store';
+import { Toaster } from '@redwoodjs/web/toast'
 
 import FatalErrorPage from 'src/pages/FatalErrorPage'
 import Routes from 'src/Routes'
 
 import './index.css'
+import LoginPage from './pages/Auth/LoginPage/loginPage'
+import { CognitoProvider } from './libs/cognito'
 
 const gqlDataProvider = dataProvider(client)
 
 const App = () => (
   <FatalErrorBoundary page={FatalErrorPage}>
     <RedwoodProvider titleTemplate="%PageTitle | %AppTitle">
-      <RedwoodApolloProvider>
-        <Refine
-          // authProvider={authProvider}
-          routerProvider={routerProvider}
-          dataProvider={gqlDataProvider as any}
-          Title={Title}
-          Header={Header}
-          Sider={Sider}
-          Footer={Footer}
-          Layout={Layout}
-          OffLayoutArea={OffLayoutArea}
-          resources={resources}
-        />
-      </RedwoodApolloProvider>
+      <CognitoProvider>
+        <RedwoodApolloProvider>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{ success: { duration: 3000 } }}
+          />
+
+          <Refine
+            LoginPage={LoginPage}
+            routerProvider={{
+              ...routerProvider,
+              routes: [
+                {
+                  exact: true,
+                  component: LoginPage,
+                  path: "/login",
+                }
+              ]
+            }}
+            dataProvider={gqlDataProvider as any}
+            Title={Title}
+            Header={Header}
+            Sider={Sider}
+            Footer={Footer}
+            Layout={Layout}
+            OffLayoutArea={OffLayoutArea}
+            resources={resources}
+          />
+        </RedwoodApolloProvider>
+      </CognitoProvider>
     </RedwoodProvider>
   </FatalErrorBoundary>
 )

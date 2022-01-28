@@ -73,7 +73,7 @@ export const loginCognito = async (payloads: AuthPayloads) => {
   // { USER_SRP_AUTH } will take in USERNAME and SRP_A and return
   // the SRP variables to be used for next challenge execution
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CognitoIdentityServiceProvider.html#confirmSignUp-property
-  cognitoUser.setAuthenticationFlowType('USER_SRP_AUTH');
+  // cognitoUser.setAuthenticationFlowType('USER_SRP_AUTH');
 
   const token = await new Promise((resolve) => {
     cognitoUser.authenticateUser(authenticationDetails, {
@@ -110,11 +110,11 @@ export const loginCognito = async (payloads: AuthPayloads) => {
 export type UserPayloads = {
   email: string,
   name: string,
-  familyName: string,
-  phoneNumber: string,
   password: string,
-  lastName: string,
-  tenantId: string,
+  phoneNumber: string,
+  familyName?: string,
+  lastName?: string,
+  tenantId?: string,
 }
 
 export const registerCognito = async (payloads: UserPayloads) => {
@@ -390,6 +390,7 @@ export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise
 export const getUserSession = async (): Promise<CognitoUserSession> => {
   return new Promise((resolve, reject) => {
     const currentUser = userPool.getCurrentUser()
+    console.log('currentUser', currentUser)
 
     if (!currentUser) resolve(null)
 
@@ -401,6 +402,7 @@ export const getUserSession = async (): Promise<CognitoUserSession> => {
         reject(error)
       }
 
+      console.log('session', session)
       resolve(session);
     })
   })
@@ -422,6 +424,25 @@ export const getToken = async (): Promise<string> => {
 
       const accessToken = session.getAccessToken()
       resolve(accessToken.getJwtToken());
+    })
+  })
+}
+
+type AdminDeleteUserPayloads = {
+  username: string;
+}
+export const adminDeleteUser = async (payloads: AdminDeleteUserPayloads) => {
+  const { username } = payloads
+
+  const params = {
+    UserPoolId: process.env.AWS_POOL_ID,
+    Username: username,
+  }
+
+  return new Promise(resolve => {
+    client.adminDeleteUser(params, (err) => {
+      if (err) resolve(false)
+      else resolve(true)
     })
   })
 }

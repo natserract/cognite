@@ -135,11 +135,14 @@ const dataProvider = (client: GraphQLClient) => {
       const { query, variables } = gql.query({
         operation,
         variables: {
-          id: {
-            value: +id!!,
-            type: "Int",
-            required: true
+          ...(!metaData.isCustom) && {
+            id: {
+              value: +id!!,
+              type: "Int",
+              required: true
+            }
           },
+          ...metaData.variables,
         },
         fields: metaData?.fields,
       });
@@ -163,7 +166,7 @@ const dataProvider = (client: GraphQLClient) => {
       const operation = metaData?.operation ?? camelResource;
       const typeInput = `${toCamelCase(camelResource)}Input`;
 
-      console.log('create resource', resource, typeInput, camelResource)
+      console.log('create resource', resource, typeInput, camelResource, variables)
 
       const { query: mutation, variables: gqlVariables } = gql.mutation({
         operation,
@@ -324,11 +327,14 @@ const dataProvider = (client: GraphQLClient) => {
       const { query: mutation, variables } = gql.mutation({
         operation,
         variables: {
-          id: {
-            value: +id!!,
-            type: "Int",
-            required: true
+          ...(!metaData?.isCustom) && {
+            id: {
+              value: +id!!,
+              type: "Int",
+              required: true
+            },
           },
+          ...metaData?.variables,
         },
         fields: metaData?.fields,
       });

@@ -1,7 +1,7 @@
-import HomePage from './HomePage'
+import UsersPage from './UsersPage'
 
 export const generated = () => {
-  return <HomePage />
+  return <UsersPage />
 }
 
 export default { title: 'Pages/HomePage' }

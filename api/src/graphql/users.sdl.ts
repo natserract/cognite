@@ -22,7 +22,7 @@ export const schema = gql`
     userAttributes: JSON
   }
 
-  input CreateUserInput {
+  input CreateUserCognitoInput {
     email: String!
     name: String!
     familyName: String
@@ -32,19 +32,20 @@ export const schema = gql`
     tenantId: String
   }
 
-  input VerifyUserInput {
+  input VerifyUserCognitoInput {
     code: String!
     username: String!
   }
 
   type Query {
     listUserCognito(search: JSON): CognitoUser @skipAuth
-    getUserCognito(username: String): GetCognitoUser @skipAuth
+    getUserCognito(username: String!): GetCognitoUser @skipAuth
+    getSession: JSON @skipAuth
   }
 
   type Mutation {
-    createUserCognito(input: UserInput!): JSON @skipAuth
-    verifyUserCognito(input: VerifyUserInput): JSON @skipAuth
-    deleteUserCognito(input: String): Boolean! @skipAuth
+    createUserCognito(input: CreateUserCognitoInput!): JSON @skipAuth
+    verifyUserCognito(input: VerifyUserCognitoInput!): JSON @skipAuth
+    deleteUserCognito(username: String!): Boolean! @skipAuth
   }
 `

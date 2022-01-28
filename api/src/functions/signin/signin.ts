@@ -1,7 +1,7 @@
 import type { APIGatewayEvent, Context } from 'aws-lambda'
 import { logger } from 'src/lib/logger'
 
-import { confirmRegistration, getUser, isAuthenticated, listUser, loginCognito, logoutCognito, registerCognito, updateUser } from 'src/lib/cognito'
+import { loginCognito } from 'src/lib/cognito'
 
 /**
  * The handler function is your code that processes http request events.
@@ -29,31 +29,20 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
   logger.info('Invoked authorization function')
 
   const { username, password } = JSON.parse(event.body) as AuthorizationBody
-  const logInResponses = await loginCognito({
+  const responses = await loginCognito({
     username,
     password,
   })
 
-  const isAuthenticate = await isAuthenticated();
-  console.log('isAuthenticate', isAuthenticate)
-
-  const user = await getUser({
-    username,
-  });
-  console.log('user responses', user);
-
-  const listUserRes = await listUser({
-    search: ''
-  })
-  console.log('listUserRes', listUserRes)
-
   return {
     statusCode: 200,
     headers: {
-      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+      'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify({
-      data: logInResponses,
+      data: responses,
     }),
   }
 }

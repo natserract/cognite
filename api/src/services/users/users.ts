@@ -1,4 +1,4 @@
-import { getUser, listUser } from 'src/lib/cognito'
+import { adminDeleteUser, getUser, getUserSession, listUser } from 'src/lib/cognito'
 
 type ListUserCognitoInput = {
   search: string;
@@ -47,6 +47,17 @@ export const verifyUserCognito = ({ input }: VerifyUserInput) => {
   // TODO: implement
 }
 
-export const deleteUserCognito = ({ input }) => {
-  // TODO: implement
+type DeleteUserCognitoInput = {
+  username: string;
+}
+export const deleteUserCognito = async ({ username }: DeleteUserCognitoInput) => {
+  const results = await adminDeleteUser({
+    username,
+  })
+
+  return results
+}
+
+export const getSession = async () => {
+  return await getUserSession();
 }
