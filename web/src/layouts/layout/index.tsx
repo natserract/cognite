@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
-import { LayoutProps, AntdLayout, Grid } from '@pankod/refine'
+import { LayoutProps, AntdLayout, Grid, useNavigation } from '@pankod/refine'
+import { useCognito } from 'src/libs/cognito';
 
 export const Layout: React.FC<LayoutProps> = ({
   children,
@@ -9,7 +10,17 @@ export const Layout: React.FC<LayoutProps> = ({
   Footer,
   OffLayoutArea,
 }) => {
+  const { isAuthenticated } = useCognito();
+
   const breakpoint = Grid.useBreakpoint()
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigation.replace('/login')
+    }
+  }, [isAuthenticated])
+
   return (
     <AntdLayout style={{ minHeight: '100vh', flexDirection: 'row' }}>
       <Sider />

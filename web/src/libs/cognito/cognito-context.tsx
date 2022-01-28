@@ -1,8 +1,8 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { loginUser, logout, userSession } from "src/api/Authorizations";
 import { toast } from '@redwoodjs/web/toast'
-import { useHistory } from 'react-router-dom'
 import { removeToken } from "src/utils/token";
+
 export interface LoginInput {
   username: string;
   password: string;
@@ -31,7 +31,7 @@ export const CognitoContext = createContext<CognitoContextInterface>({
 type Props = {}
 
 export const CognitoProvider: React.FC<Props> = (props) => {
-  const history = useHistory();
+  // const navigation = useNavigation()
 
   const [state, setState] =
     useState<Pick<CognitoContextInterface, 'isAuthenticated' | 'currentUser'>>({
@@ -81,9 +81,6 @@ export const CognitoProvider: React.FC<Props> = (props) => {
           window.location.href = '/login'
           removeToken()
         }
-
-        console.log('currentUser', currentUser)
-
         setState({
           currentUser,
           isAuthenticated: true
@@ -92,9 +89,13 @@ export const CognitoProvider: React.FC<Props> = (props) => {
     }
 
     onFetch()
-  }, [logOut])
+  }, [])
 
   useEffect(setActiveState, [])
+
+  useEffect(() => {
+    console.log("Mounted!")
+  }, [])
 
   // Prevents unnecessary renders
   const value = useMemo(

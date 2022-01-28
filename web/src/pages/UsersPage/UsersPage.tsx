@@ -14,10 +14,11 @@ import {
   ShowButton,
   DeleteButton,
   Button,
+  useNavigation,
 } from '@pankod/refine';
 
 import { TableFilter } from 'src/components/table'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const searchConfig = {
   searchAmount: 'amount',
@@ -29,6 +30,8 @@ const getUserName = (values: Array<any>, key: string) => {
 }
 
 const UsersPage = () => {
+  const navigation = useNavigation()
+
   const {
     tableProps,
     formProps,
@@ -111,8 +114,6 @@ const UsersPage = () => {
                 dataIndex="actions"
                 title="Actions"
                 render={(value: any, record: any) => {
-                  const item = getUserName(record['Attributes'], 'email');
-
                   return (
                     <Space>
                       <EditButton
@@ -128,16 +129,16 @@ const UsersPage = () => {
                       <DeleteButton
                         hideText
                         resourceName="userCognito"
-                        // metaData={{
-                        //   isCustom: true,
-                        //   variables: {
-                        //     username: {
-                        //       value: item['Value'],
-                        //       type: "String",
-                        //       required: true
-                        //     }
-                        //   }
-                        // }}
+                        metaData={{
+                          isCustom: true,
+                          variables: {
+                            username: {
+                              value: record.Attributes.email,
+                              type: "String",
+                              required: true
+                            }
+                          }
+                        }}
                         size="small"
                         recordItemId={record.Username}
                       />

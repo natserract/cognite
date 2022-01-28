@@ -6,11 +6,11 @@ import {
   Input,
   Select,
   useForm,
+  useNavigation
 } from "@pankod/refine";
-import { useHistory } from 'react-router-dom'
 
 const UserCreatePage = () => {
-  const history = useHistory()
+  const navigation = useNavigation()
 
   const { formProps, saveButtonProps } = useForm({
     resource: 'userCognito',
@@ -22,7 +22,7 @@ const UserCreatePage = () => {
     },
     onMutationSuccess: (data) => {
       if (data) {
-        history.push('/users');
+        navigation.push('/users')
       }
     }
   });

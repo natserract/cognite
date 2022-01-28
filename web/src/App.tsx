@@ -19,6 +19,7 @@ import Routes from 'src/Routes'
 import './index.css'
 import LoginPage from './pages/Auth/LoginPage/loginPage'
 import { CognitoProvider } from './libs/cognito'
+import accessControlProvider from './libs/refine/access.control'
 
 const gqlDataProvider = dataProvider(client)
 
@@ -35,7 +36,7 @@ const App = () => (
           <Refine
             LoginPage={LoginPage}
             routerProvider={{
-              ...routerProvider,
+              ...routerProvider as any,
               routes: [
                 {
                   exact: true,
@@ -52,6 +53,7 @@ const App = () => (
             Layout={Layout}
             OffLayoutArea={OffLayoutArea}
             resources={resources}
+            accessControlProvider={accessControlProvider()}
           />
         </RedwoodApolloProvider>
       </CognitoProvider>

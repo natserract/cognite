@@ -1,17 +1,17 @@
 import { Link, routes } from '@redwoodjs/router'
 import { MetaTags } from '@redwoodjs/web'
-import { useHistory } from 'react-router-dom'
 import {
   useForm,
   Edit,
   Form,
   Input,
   Select,
+  useNavigation
 } from '@pankod/refine';
 import { useCognito } from 'src/libs/cognito';
 
 const UserEditPage = () => {
-  const history = useHistory()
+  const navigation = useNavigation()
   const { currentUser } = useCognito()
 
   const { formProps, saveButtonProps, queryResult } = useForm({
@@ -39,7 +39,7 @@ const UserEditPage = () => {
     },
     onMutationSuccess: (data) => {
       if (data) {
-        history.push('/users');
+        navigation.push('/users')
       }
     }
   });
