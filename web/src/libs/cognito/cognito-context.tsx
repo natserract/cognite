@@ -1,19 +1,15 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import { loginUser, logout, userSession } from "src/api/Authorizations";
+import { loginUser, logout, userSession, currentUser } from "src/api/Authorizations";
 import { toast } from '@redwoodjs/web/toast'
 import { removeToken } from "src/utils/token";
+import { ASTCognitoUser } from "./types";
 
 export interface LoginInput {
   username: string;
   password: string;
 }
 
-export interface CurrentUser {
-  email: string;
-  name: string;
-  [k: string]: any;
-}
-
+export interface CurrentUser extends ASTCognitoUser {};
 export interface CognitoContextInterface {
   isAuthenticated: boolean
   currentUser: CurrentUser
@@ -45,11 +41,12 @@ export const CognitoProvider: React.FC<Props> = (props) => {
   ) => {
     try {
       const logInFn = await loginUser(username, password);
+      const user = await currentUser(logInFn.accessToken.jwtToken)
 
       if (logInFn) {
         setState({
           isAuthenticated: logInFn !== null,
-          currentUser: logInFn.accessToken.payload,
+          currentUser: { ...user.getUserCognito },
         })
 
         return logInFn
@@ -70,19 +67,13 @@ export const CognitoProvider: React.FC<Props> = (props) => {
     return Promise.resolve('/login');
   }, [])
 
-  const setActiveState = useCallback(() => {
+  const setAuthenticated = useCallback(() => {
     const onFetch = async () => {
       const token = localStorage.getItem('token');
 
       if (token !== null) {
-        const currentUser = await userSession();
-
-        if (!currentUser) {
-          window.location.href = '/login'
-          removeToken()
-        }
         setState({
-          currentUser,
+          ...state,
           isAuthenticated: true
         })
       }
@@ -91,11 +82,28 @@ export const CognitoProvider: React.FC<Props> = (props) => {
     onFetch()
   }, [])
 
-  useEffect(setActiveState, [])
+  useEffect(setAuthenticated, [])
 
-  useEffect(() => {
-    console.log("Mounted!")
-  }, [])
+  const getCurrentUser = useCallback(() => {
+    const onFetchCurrentUser = async () => {
+      const token = localStorage.getItem('token');
+
+      if (token !== null) {
+        const user = await currentUser(token)
+
+        if (user) {
+          setState({
+            isAuthenticated: true,
+            currentUser: { ...user.getUserCognito }
+          })
+        }
+      }
+    }
+
+    onFetchCurrentUser()
+  }, []);
+
+  useEffect(getCurrentUser, [])
 
   // Prevents unnecessary renders
   const value = useMemo(

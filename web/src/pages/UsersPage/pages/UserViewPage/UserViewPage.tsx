@@ -9,12 +9,12 @@ const UserViewPage = () => {
   const { currentUser } = useCognito()
 
   const { queryResult } = useShow({
-    resource: 'getUserCognito',
+    resource: 'userCognito',
     metaData: {
       isCustom: true,
       variables: {
-        username: {
-          value: currentUser.email,
+        token: {
+          value: localStorage.getItem('token'),
           type: 'String',
           required: true,
         }
@@ -30,9 +30,6 @@ const UserViewPage = () => {
   const { data, isLoading } = queryResult;
   const record = data?.data;
 
-  console.log('queryResult', queryResult)
-
-
   return (
     <Show isLoading={isLoading}>
       <Title level={5}>Key</Title>
@@ -42,6 +39,9 @@ const UserViewPage = () => {
       <Text>{JSON.stringify(record?.UserAttributes)}</Text>
 
     </Show>
+  )
+  return (
+    <React.Fragment />
   )
 }
 

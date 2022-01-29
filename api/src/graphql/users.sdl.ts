@@ -48,8 +48,8 @@ export const schema = gql`
 
   type Query {
     listUserCognito(search: JSON): CognitoUser @skipAuth
-    getUserCognito(username: String!): GetCognitoUser @skipAuth
-    getSession: JSON @skipAuth
+    getUserCognito(token: String!): GetCognitoUser @skipAuth
+    getSession(token: String!): JSON @skipAuth
   }
 
   type Mutation {

@@ -8,15 +8,18 @@ import {
   Button,
   Checkbox,
   Input,
-  useNavigation
+  useNavigation,
 } from "@pankod/refine";
 import { useCallback, useEffect } from "react";
 import { useCognito } from "src/libs/cognito";
+import routerProvider from "@pankod/refine-react-router";
 
 export interface ILoginForm {
   username: string;
   password: string;
 }
+
+const { Link } = routerProvider
 
 const Login: React.FC = () => {
   const [form] = Form.useForm<ILoginForm>();
@@ -115,7 +118,7 @@ const Login: React.FC = () => {
               style={{ textAlign: "center", padding: "10px 0px" }}
             >
               <Typography.Text>
-                Still no account? Please go to <a href="#"> Sign up</a>
+                Still no account? Please go to <Link to="/users/create"> Sign up</Link>
               </Typography.Text>
             </div>
           </Card>

@@ -33,6 +33,37 @@ export const loginUser = async (username: string, password: string) => {
   )
 }
 
+export const currentUser = async (token: string) => {
+  return Axios.post(
+    GRAPHQL_ENDPOINT,
+    {
+      query: `
+        query GetUserCognito($token: String!) {
+          getUserCognito(token: $token) {
+            Username
+            UserAttributes
+            UserCreateDate
+          }
+        }
+      `,
+      variables: {
+        token,
+      }
+    }
+  ).then(
+    (response) => {
+      const { data } = response.data;
+
+      if (data.error) return Promise.reject()
+      return data
+    },
+    (error) => {
+      const errorResponse = error.response;
+      return Promise.reject({ ...errorResponse })
+    }
+  )
+}
+
 export const userSession = async () => {
   return Axios.post(
     GRAPHQL_ENDPOINT,

@@ -1,5 +1,5 @@
 import type { APIGatewayEvent, Context } from 'aws-lambda'
-import { getUserSession, getToken, updateUser, UserPayloads, getUser } from 'src/lib/cognito'
+import { getUserSession, getToken, updateUser, UserPayloads, getAdminUser } from 'src/lib/cognito'
 import { logger } from 'src/lib/logger'
 
 /**
@@ -43,7 +43,7 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
     const payload = userSession.getIdToken()
     const { email } = payload.payload
 
-    const results = await getUser({
+    const results = await getAdminUser({
       username: email,
     })
 

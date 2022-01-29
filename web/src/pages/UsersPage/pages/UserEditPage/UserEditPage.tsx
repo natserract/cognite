@@ -25,8 +25,8 @@ const UserEditPage = () => {
         'UserCreateDate',
       ],
       variables: {
-        username: {
-          value: currentUser.email,
+        token: {
+          value: localStorage.getItem('token'),
           type: 'String',
           required: true,
         }

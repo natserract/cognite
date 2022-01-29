@@ -2,6 +2,9 @@ import React, { useEffect } from 'react'
 
 import { LayoutProps, AntdLayout, Grid, useNavigation } from '@pankod/refine'
 import { useCognito } from 'src/libs/cognito';
+import routerProvider from "@pankod/refine-react-router";
+
+const { useLocation } = routerProvider
 
 export const Layout: React.FC<LayoutProps> = ({
   children,
@@ -14,12 +17,20 @@ export const Layout: React.FC<LayoutProps> = ({
 
   const breakpoint = Grid.useBreakpoint()
   const navigation = useNavigation();
+  const location = useLocation();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigation.replace('/login')
+    const publicRoutes = [
+      '/users/create'
+    ]
+
+    // Only redirect in private routes
+    if (!publicRoutes.includes(location.pathname)) {
+      if (!isAuthenticated) {
+        navigation.replace('/login')
+      }
     }
-  }, [isAuthenticated])
+  }, [location, isAuthenticated])
 
   return (
     <AntdLayout style={{ minHeight: '100vh', flexDirection: 'row' }}>

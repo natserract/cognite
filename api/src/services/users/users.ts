@@ -1,4 +1,15 @@
-import { adminDeleteUser, confirmRegistration, getToken, getUser, getUserSession, listUser, registerCognito, updateUser, UserPayloads } from 'src/lib/cognito'
+import {
+  adminDeleteUser,
+  confirmRegistration,
+  getToken,
+  getAdminUser,
+  getUserSession,
+  listUser,
+  registerCognito,
+  updateUser,
+  UserPayloads,
+  getUser
+} from 'src/lib/cognito'
 
 type ListUserCognitoInput = {
   search: string;
@@ -10,10 +21,14 @@ export const listUserCognito = async ({ search }: ListUserCognitoInput) => {
 }
 
 type GetUserCognitoInput = {
-  username: string;
+  token: string;
 }
-export const getUserCognito = async ({ username }: GetUserCognitoInput) => {
-  const results = await getUser({ username })
+export const getUserCognito = async ({ token }: GetUserCognitoInput) => {
+  const userCognito = await getUser(token);
+  const results = await getAdminUser({
+    username: userCognito.UserAttributes.email
+  })
+
   return results
 }
 
@@ -69,8 +84,12 @@ export const deleteUserCognito = async ({ username }: DeleteUserCognitoInput) =>
   return results
 }
 
-export const getSession = async () => {
-  return await getUserSession();
+type GetSessionInput = {
+  token: string;
+}
+
+export const getSession = async ({ token }: GetSessionInput) => {
+  return await getUser(token);
 }
 
 type UpdateUserCognitoInput = {
@@ -94,7 +113,7 @@ export const updateUserCognito = async ({ input }: UpdateUserCognitoInput) => {
     const payload = userSession.getIdToken()
     const { email } = payload.payload
 
-    const results = await getUser({
+    const results = await getAdminUser({
       username: email,
     })
 

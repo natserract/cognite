@@ -3,6 +3,7 @@ import CognitoIdentityServiceProvider from 'aws-sdk/clients/cognitoidentityservi
 import AWS from 'aws-sdk'
 import owasp from 'owasp-password-strength-test';
 import { parseUserAttributes } from './utils';
+import { ASTCognitoUser } from './types';
 
 global.fetch = require('node-fetch');
 
@@ -74,7 +75,8 @@ export const loginCognito = async (payloads: AuthPayloads) => {
   // { USER_SRP_AUTH } will take in USERNAME and SRP_A and return
   // the SRP variables to be used for next challenge execution
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CognitoIdentityServiceProvider.html#confirmSignUp-property
-  // cognitoUser.setAuthenticationFlowType('USER_SRP_AUTH');
+  // @default: cognitoUser.setAuthenticationFlowType('USER_SRP_AUTH');
+  cognitoUser.setAuthenticationFlowType('USER_PASSWORD_AUTH');
 
   const token = await new Promise((resolve) => {
     cognitoUser.authenticateUser(authenticationDetails, {
@@ -380,9 +382,9 @@ export const listUser = async (payloads: ListUserPayloads) => {
   })
 }
 
-type GetUserReturn = CognitoIdentityServiceProvider.AdminGetUserResponse
+type GetAdminUserReturn = CognitoIdentityServiceProvider.AdminGetUserResponse
 
-export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise<GetUserReturn> => {
+export const getAdminUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise<GetAdminUserReturn> => {
   const { username } = payloads
   const params = {
     UserPoolId: process.env.AWS_POOL_ID,
@@ -396,7 +398,7 @@ export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise
     ) => {
       if (err) reject(err)
 
-      let mappingResult = {} as GetUserReturn;
+      let mappingResult = {} as GetAdminUserReturn;
       Object.entries(result).forEach(([key, val]) => {
         if (key !== 'UserAttributes') {
           mappingResult[key] = val
@@ -409,6 +411,34 @@ export const getUser = async (payloads: Pick<AuthPayloads, 'username'>): Promise
       resolve(mappingResult)
     })
   })
+}
+
+type GetUserReturn = ASTCognitoUser
+
+export const getUser = async (token: string): Promise<GetUserReturn> => {
+  const params = {
+    AccessToken: token,
+  }
+
+  return new Promise((resolve, reject) => {
+    client.getUser(params, (
+      err,
+      data
+    ) => {
+      if (err) {
+        reject(err)
+      }
+
+      if (!data) resolve(data as unknown as ASTCognitoUser);
+      else {
+        let UserAttributes = parseUserAttributes(data.UserAttributes, {})
+        data.UserAttributes = UserAttributes.UserAttributes as any;
+
+        resolve(data as unknown as ASTCognitoUser)
+      }
+    });
+  })
+
 }
 
 export const getUserSession = async (): Promise<CognitoUserSession> => {
